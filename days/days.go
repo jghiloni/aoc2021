@@ -1,6 +1,6 @@
 package days
 
-var DayMap = make(map[string]Day, 24)
+var DayMap = make(map[uint]Day, 24)
 
 type Day interface {
 	Part1() string
@@ -8,5 +8,5 @@ type Day interface {
 }
 
 func init() {
-	DayMap["1"] = &day1{}
+	DayMap[1] = &day1{}
 }

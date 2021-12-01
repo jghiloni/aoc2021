@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"strconv"
 
 	"github.com/jghiloni/aoc2021/days"
 )
@@ -19,7 +18,7 @@ func main() {
 	flag.UintVar(&exercise, "exercise", 1, "Which exercise to run (1 or 2, defaults to 1)")
 	flag.Parse()
 
-	dayIntf, ok := days.DayMap[strconv.FormatUint(uint64(day), 10)]
+	dayIntf, ok := days.DayMap[day]
 	if !ok {
 		log.Fatalf("day %d has not been implemented", day)
 	}
