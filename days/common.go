@@ -22,3 +22,7 @@ func slurpListAsInts(input string) []int {
 
 	return ints
 }
+
+func slurpListAsLines(input string) []string {
+	return strings.Split(input, "\n")
+}

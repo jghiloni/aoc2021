@@ -9,4 +9,5 @@ type Day interface {
 
 func init() {
 	DayMap[1] = &day1{}
+	DayMap[2] = &day2{}
 }
