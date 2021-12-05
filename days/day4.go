@@ -5,6 +5,8 @@ import (
 	"log"
 	"strconv"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 type day4 struct{}
@@ -19,6 +21,22 @@ type board [5][5]item
 type boards []board
 
 func (d *day4) Part1() string {
+	boards, calledNumbers := getBoards()
+
+	winningBoard, lastInput := findFirstWinner(boards, calledNumbers)
+
+	return fmt.Sprintf("winning board:\n%v\n\nscore: %d", winningBoard, score(winningBoard, lastInput))
+}
+
+func (d *day4) Part2() string {
+	boards, calledNumbers := getBoards()
+
+	winningBoard, lastInput := findLastWinner(boards, calledNumbers)
+
+	return fmt.Sprintf("winning board:\n%v\n\nscore: %d", winningBoard, score(winningBoard, lastInput))
+}
+
+func getBoards() (boards, []string) {
 	lines := slurpListAsLines(input4)
 
 	calledNumbers := strings.Split(lines[0], ",")
@@ -45,17 +63,10 @@ func (d *day4) Part1() string {
 		boards = append(boards, board)
 	}
 
-	winningBoard, lastInput := boards.findFirstWinner(calledNumbers)
-
-	return fmt.Sprintf("winning board: %v\n\nscore: %d", winningBoard, winningBoard.score(lastInput))
+	return boards, calledNumbers
 }
 
-func (d *day4) Part2() string {
-	return ""
-}
-
-func (b boards) findFirstWinner(calledNumbers []string) (board, int) {
-	var winningBoard board
+func findFirstWinner(b boards, calledNumbers []string) (board, int) {
 
 	for i := range calledNumbers {
 		calledNumber, err := strconv.Atoi(calledNumbers[i])
@@ -63,9 +74,9 @@ func (b boards) findFirstWinner(calledNumbers []string) (board, int) {
 			log.Fatal(err)
 		}
 
-		for _, board := range b {
-			if board.mark(calledNumber) {
-				return winningBoard, calledNumber
+		for j := range b {
+			if mark(&b[j], calledNumber) {
+				return b[j], calledNumber
 			}
 		}
 	}
@@ -73,12 +84,47 @@ func (b boards) findFirstWinner(calledNumbers []string) (board, int) {
 	return board([5][5]item{}), -1
 }
 
-func (b *board) mark(num int) bool {
+func findLastWinner(b boards, calledNumbers []string) (board, int) {
+	completedBoards := make([]int, 0, len(b))
+	lastNumber := -1
+
+	for j := range calledNumbers {
+		calledNumber, err := strconv.Atoi(calledNumbers[j])
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for i := range b {
+			if indexOf(completedBoards, i) != -1 {
+				continue
+			}
+
+			if mark(&b[i], calledNumber) {
+				lastNumber = calledNumber
+				completedBoards = append(completedBoards, i)
+			}
+		}
+	}
+
+	return b[completedBoards[len(completedBoards)-1]], lastNumber
+}
+
+func indexOf(b []int, val int) int {
+	for i := range b {
+		if b[i] == val {
+			return i
+		}
+	}
+
+	return -1
+}
+
+func mark(b *board, num int) bool {
 	for row := 0; row < 5; row++ {
 		for col := 0; col < 5; col++ {
 			if b[row][col].value == num {
 				b[row][col].marked = true
-				if b.check() {
+				if check(*b) {
 					return true
 				}
 			}
@@ -88,7 +134,7 @@ func (b *board) mark(num int) bool {
 	return false
 }
 
-func (b board) check() bool {
+func check(b board) bool {
 	for i := 0; i < 5; i++ {
 		// check row i
 		if b[i][0].marked &&
@@ -112,7 +158,7 @@ func (b board) check() bool {
 	return false
 }
 
-func (b board) score(multiplier int) int {
+func score(b board, multiplier int) int {
 	sum := 0
 	for row := 0; row < 5; row++ {
 		for col := 0; col < 5; col++ {
@@ -123,4 +169,23 @@ func (b board) score(multiplier int) int {
 	}
 
 	return sum * multiplier
+}
+
+func (b board) String() string {
+	return fmt.Sprintf("%s %s %s %s %s\n%s %s %s %s %s\n%s %s %s %s %s\n%s %s %s %s %s\n%s %s %s %s %s",
+		colorize(b[0][0]), colorize(b[0][1]), colorize(b[0][2]), colorize(b[0][3]), colorize(b[0][4]),
+		colorize(b[1][0]), colorize(b[1][1]), colorize(b[1][2]), colorize(b[1][3]), colorize(b[1][4]),
+		colorize(b[2][0]), colorize(b[2][1]), colorize(b[2][2]), colorize(b[2][3]), colorize(b[2][4]),
+		colorize(b[3][0]), colorize(b[3][1]), colorize(b[3][2]), colorize(b[3][3]), colorize(b[3][4]),
+		colorize(b[4][0]), colorize(b[4][1]), colorize(b[4][2]), colorize(b[4][3]), colorize(b[4][4]),
+	)
+}
+
+func colorize(i item) string {
+	str := fmt.Sprintf("%02d", i.value)
+	if i.marked {
+		str = color.GreenString(str)
+	}
+
+	return str
 }
