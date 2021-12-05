@@ -2,8 +2,6 @@ package days
 
 import (
 	"fmt"
-	"math"
-	"sort"
 )
 
 type day5 struct{}
@@ -20,33 +18,12 @@ type lineSegment struct {
 
 func (d *day5) Part1() string {
 	segments := readInput()
-	bottomRight := getBoardSize(segments)
-
-	board := make(map[point]int, bottomRight.x*bottomRight.y)
+	board := make(map[point]int)
 
 	for _, segment := range segments {
-		if (segment.pointA.x != segment.pointB.x) && (segment.pointA.y != segment.pointB.y) {
-			continue
-		}
-
-		if segment.pointA.x == segment.pointB.x {
-			if segment.pointA.y > segment.pointB.y {
-				segment.pointA, segment.pointB = segment.pointB, segment.pointA
-			}
-
-			for y := segment.pointA.y; y <= segment.pointB.y; y++ {
-				board[point{segment.pointA.x, y}]++
-			}
-		}
-
-		if segment.pointA.y == segment.pointB.y {
-			if segment.pointA.x > segment.pointB.x {
-				segment.pointA, segment.pointB = segment.pointB, segment.pointA
-			}
-
-			for x := segment.pointA.x; x <= segment.pointB.x; x++ {
-				board[point{x, segment.pointA.y}]++
-			}
+		points := validateSegment(segment, false)
+		for _, p := range points {
+			board[p]++
 		}
 	}
 
@@ -62,12 +39,10 @@ func (d *day5) Part1() string {
 
 func (d *day5) Part2() string {
 	segments := readInput()
-	bottomRight := getBoardSize(segments)
-
-	board := make(map[point]int, bottomRight.x*bottomRight.y)
+	board := make(map[point]int)
 
 	for _, segment := range segments {
-		points := validateSegment(segment)
+		points := validateSegment(segment, true)
 		for _, p := range points {
 			board[p]++
 		}
@@ -101,35 +76,13 @@ func readInput() []lineSegment {
 	return segments
 }
 
-func getBoardSize(segments []lineSegment) point {
-	points := make([]point, 0, len(segments))
-
-	for _, seg := range segments {
-		points = append(points, seg.pointA, seg.pointB)
-	}
-
-	sort.Slice(points, func(i, j int) bool {
-		return points[i].x > points[j].x
-	})
-
-	maxX := points[0].x
-
-	sort.Slice(points, func(i, j int) bool {
-		return points[i].y > points[j].y
-	})
-
-	maxY := points[0].y
-
-	return point{maxX, maxY}
-}
-
-func validateSegment(segment lineSegment) []point {
+func validateSegment(segment lineSegment, diagonalAllowed bool) []point {
 	deltaX, deltaY := segment.pointB.x-segment.pointA.x, segment.pointB.y-segment.pointA.y
 
 	points := []point{}
 
 	if deltaX == 0 {
-		incr := deltaY / int(math.Abs(float64(deltaY)))
+		incr := deltaY / intAbs(deltaY)
 		for y := 0; y != deltaY+incr; y += incr {
 			points = append(points, point{segment.pointA.x, segment.pointA.y + y})
 		}
@@ -138,7 +91,7 @@ func validateSegment(segment lineSegment) []point {
 	}
 
 	if deltaY == 0 {
-		incr := deltaX / int(math.Abs(float64(deltaX)))
+		incr := deltaX / intAbs(deltaX)
 		for x := 0; x != deltaX+incr; x += incr {
 			points = append(points, point{segment.pointA.x + x, segment.pointA.y})
 		}
@@ -146,10 +99,10 @@ func validateSegment(segment lineSegment) []point {
 		return points
 	}
 
-	if math.Abs(float64(deltaX)) == math.Abs(float64(deltaY)) {
-		incr := int(math.Abs(float64(deltaX)))
-		xSign := deltaX / int(math.Abs(float64(deltaX)))
-		ySign := deltaY / int(math.Abs(float64(deltaY)))
+	if diagonalAllowed && (intAbs(deltaX) == intAbs(deltaY)) {
+		incr := intAbs(deltaX)
+		xSign := deltaX / intAbs(deltaX)
+		ySign := deltaY / intAbs(deltaY)
 
 		for i := 0; i <= incr; i++ {
 			points = append(points, point{segment.pointA.x + (i * xSign), segment.pointA.y + (i * ySign)})
@@ -159,4 +112,12 @@ func validateSegment(segment lineSegment) []point {
 	}
 
 	return nil
+}
+
+func intAbs(x int) int {
+	if x >= 0 {
+		return x
+	}
+
+	return -x
 }
