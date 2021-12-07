@@ -3,6 +3,7 @@ package days
 import (
 	"fmt"
 	"math"
+	"sort"
 )
 
 type day7 struct{}
@@ -19,7 +20,9 @@ func (d *day7) Part1() string {
 	positionSet, positionCounts := positionsAndCounts(crabPositions)
 
 	fuelCount := math.MaxInt
-	for _, position := range positionSet {
+	sort.Sort(sort.Reverse(sort.IntSlice(positionSet)))
+
+	for position := 0; position <= positionSet[0]; position++ {
 		tmpFuelCount := 0
 		for k := range positionCounts {
 			tmpFuelCount += positionCounts[k] * intAbs(position-k)
@@ -39,11 +42,22 @@ func (d *day7) Part2() string {
 	//  k
 	//  Σ  n = (n² + n)/2
 	// n=1
+	// EDIT: WRONG. Answer 97038219 is too high.
+
+	// Attempt 2: I think I got lucky in Part 1 by only checking positions where
+	// crabs already were. The example here shows a winning position that does
+	// not have a crab already there. So, loop over all values between 0 and
+	// max(positions) to see which wins.
+	// Answer 97038163 is correct. Refactored Part 1 to use this method.
+
 	crabPositions := slurpListAsInts(input7)
 	positionSet, positionCounts := positionsAndCounts(crabPositions)
 
 	fuelCount := math.MaxInt
-	for _, position := range positionSet {
+
+	sort.Sort(sort.Reverse(sort.IntSlice(positionSet)))
+
+	for position := 0; position <= positionSet[0]; position++ {
 		tmpFuelCount := 0
 		for k := range positionCounts {
 			tmpFuelCount += positionCounts[k] * subsequenceTotal(intAbs(position-k))
