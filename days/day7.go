@@ -34,7 +34,27 @@ func (d *day7) Part1() string {
 }
 
 func (d *day7) Part2() string {
-	return ""
+	// Attempt 1: Instead of multiplying by difference, multiply by arithmetic
+	// subseries total. Remenber that
+	//  k
+	//  Σ  n = (n² + n)/2
+	// n=1
+	crabPositions := slurpListAsInts(input7)
+	positionSet, positionCounts := positionsAndCounts(crabPositions)
+
+	fuelCount := math.MaxInt
+	for _, position := range positionSet {
+		tmpFuelCount := 0
+		for k := range positionCounts {
+			tmpFuelCount += positionCounts[k] * subsequenceTotal(intAbs(position-k))
+		}
+
+		if tmpFuelCount < fuelCount {
+			fuelCount = tmpFuelCount
+		}
+	}
+
+	return fmt.Sprint(fuelCount)
 }
 
 func positionsAndCounts(list []int) ([]int, map[int]int) {
@@ -50,4 +70,8 @@ func positionsAndCounts(list []int) ([]int, map[int]int) {
 	}
 
 	return positions, set
+}
+
+func subsequenceTotal(i int) int {
+	return ((i * i) + i) / 2
 }
