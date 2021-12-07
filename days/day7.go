@@ -1,41 +1,53 @@
 package days
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 type day7 struct{}
 
 func (d *day7) Part1() string {
 	// initial theory based on example input: normalizing to the mode provides
-	// the optimal fuel consumption as it provides the most zeroes
+	// the optimal fuel consumption as it provides the most zeroes. O(n)
+	// EDIT: WRONG. Answer 425971 is too high
+
+	// Attempt 2: Convert list to map[num]countOfNum. O(n + m^2), n = max(list).
+	// Answer 345035 is correct
 
 	crabPositions := slurpListAsInts(input7)
-	normalPosition := mode(crabPositions)
+	positionSet, positionCounts := positionsAndCounts(crabPositions)
 
-	fuelTotal := 0
-	for _, pos := range crabPositions {
-		fuelTotal += intAbs(pos - normalPosition)
+	fuelCount := math.MaxInt
+	for _, position := range positionSet {
+		tmpFuelCount := 0
+		for k := range positionCounts {
+			tmpFuelCount += positionCounts[k] * intAbs(position-k)
+		}
+
+		if tmpFuelCount < fuelCount {
+			fuelCount = tmpFuelCount
+		}
 	}
 
-	return fmt.Sprintf("mode = %d, fuel total = %d", normalPosition, fuelTotal)
+	return fmt.Sprint(fuelCount)
 }
 
 func (d *day7) Part2() string {
 	return ""
 }
 
-func mode(list []int) int {
+func positionsAndCounts(list []int) ([]int, map[int]int) {
 	set := map[int]int{}
 
 	for _, i := range list {
 		set[i]++
 	}
 
-	max := 0
+	positions := make([]int, 0, len(set))
 	for k := range set {
-		if set[k] > set[max] {
-			max = k
-		}
+		positions = append(positions, k)
 	}
 
-	return max
+	return positions, set
 }
