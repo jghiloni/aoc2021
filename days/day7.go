@@ -38,7 +38,7 @@ func (d *day7) Part1() string {
 
 func (d *day7) Part2() string {
 	// Attempt 1: Instead of multiplying by difference, multiply by arithmetic
-	// subseries total. Remenber that
+	// subseries total. Remember that
 	//  k
 	//  Σ  n = (n² + n)/2
 	// n=1
