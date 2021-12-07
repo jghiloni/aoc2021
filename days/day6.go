@@ -2,7 +2,6 @@ package days
 
 import (
 	"fmt"
-	"strings"
 )
 
 type day6 struct{}
@@ -27,7 +26,7 @@ func countFishies(numDays int) string {
 
 func parseInput() map[int]int64 {
 	fishies := map[int]int64{}
-	for _, remainingGestationPeriod := range slurpListAsInts(strings.ReplaceAll(input6, ",", " ")) {
+	for _, remainingGestationPeriod := range slurpListAsInts(input6) {
 		fishies[remainingGestationPeriod]++
 	}
 	return fishies

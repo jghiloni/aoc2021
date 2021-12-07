@@ -7,7 +7,7 @@ import (
 )
 
 func slurpListAsInts(input string) []int {
-	list := strings.Fields(input)
+	list := strings.Fields(strings.ReplaceAll(input, ",", " "))
 
 	ints := make([]int, len(list))
 
